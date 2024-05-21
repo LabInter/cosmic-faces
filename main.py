@@ -7,12 +7,7 @@ mp_face_mesh = func.mp.solutions.face_mesh
 # Tentativa de acesso à camera com tratamento se der erro (except)
 try:
     cap = cv2.VideoCapture(0)
-    # if cap.isOpened():
-    #     # TODO: atribuir outros valores para largura e altura.
-    #     cap.set(3, 4096)  # Largura da captura
-    #     cap.set(4, 4096)  # Altura da captura
-    # else:
-    #     raise Exception("Não foi possível abrir a câmera.")
+
 except Exception as e:
     print(f"Erro ao abrir a câmera: {e}")
 
@@ -26,7 +21,7 @@ else:
         cont = int(file.read().strip())
     
 with mp_face_mesh.FaceMesh(
-    max_num_faces=3,
+    max_num_faces=1,
     refine_landmarks=True,
     min_detection_confidence=0.8,
     min_tracking_confidence=0.5) as face_mesh:
