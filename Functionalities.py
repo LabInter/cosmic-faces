@@ -285,27 +285,31 @@ def load_coordenadas(file_path):
 
 # Utiliza os landmarks para desenhar a máscara
 def make_landmarks(mp_drawing, mp_face_mesh, mp_drawing_styles, image, face_landmarks):
+    white_color = (255, 255, 255) 
+    drawing_style = mp_drawing.DrawingSpec(color=white_color, thickness=1, circle_radius=1)
+
     mp_drawing.draw_landmarks(
         image=image,
         landmark_list=face_landmarks,
         connections=mp_face_mesh.FACEMESH_TESSELATION,
         landmark_drawing_spec=None,
-        connection_drawing_spec=mp_drawing_styles
-        .get_default_face_mesh_tesselation_style())
+        connection_drawing_spec=drawing_style
+    )
     mp_drawing.draw_landmarks(
         image=image,
         landmark_list=face_landmarks,
         connections=mp_face_mesh.FACEMESH_CONTOURS,
         landmark_drawing_spec=None,
-        connection_drawing_spec=mp_drawing_styles
-        .get_default_face_mesh_contours_style())
+        connection_drawing_spec=drawing_style
+    )
     mp_drawing.draw_landmarks(
         image=image,
         landmark_list=face_landmarks,
         connections=mp_face_mesh.FACEMESH_IRISES,
-        landmark_drawing_spec=None,         
-        connection_drawing_spec=mp_drawing_styles
-        .get_default_face_mesh_iris_connections_style())
+        landmark_drawing_spec=None,
+        connection_drawing_spec=drawing_style
+    )
+
     
 def is_face_near_edge(x_forehead, y_forehead, x_chin, y_chin, image_shape, margin=50):
     # Obtém as dimensões da imagem
