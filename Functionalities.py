@@ -255,13 +255,6 @@ def make_landmarks(mp_drawing, mp_face_mesh, mp_drawing_styles, image, face_land
     mp_drawing.draw_landmarks(
         image=image,
         landmark_list=face_landmarks,
-        connections=mp_face_mesh.FACEMESH_TESSELATION,
-        landmark_drawing_spec=None,
-        connection_drawing_spec=drawing_style
-    )
-    mp_drawing.draw_landmarks(
-        image=image,
-        landmark_list=face_landmarks,
         connections=mp_face_mesh.FACEMESH_CONTOURS,
         landmark_drawing_spec=None,
         connection_drawing_spec=drawing_style
