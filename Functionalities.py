@@ -3,9 +3,12 @@ import cv2
 import ast
 import random
 import mediapipe as mp
+import textwrap
+
 
 face_info = [None, None, None]
 face_detected = False
+text_max_width = 40
 phrases = [
     [
         "Are some technical objects just in the background, while the closer one gets to an epistemic situation, the more attention needs to be paid to the technical objects that are implied",
@@ -50,8 +53,8 @@ phrases = [
 ]
 
 # "constantes"
-SMALL_DISTANCE = 120
-BIG_DISTANCE = 70
+SMALL_DISTANCE = 300
+BIG_DISTANCE = 200
 
 # Salvar a imagem de captura de a cada 10 rostos.
 def main_loop(cap, face_mesh, cont):
@@ -87,6 +90,16 @@ def main_loop(cap, face_mesh, cont):
             print(f"Erro: {e}")
     return cont
 
+def draw_text(image, text, x, y, font, font_scale, color, thickness, line_type, max_width, contour_color, contour_thickness):
+    lines = textwrap.wrap(text, width=max_width)
+    y_offset = 0
+    for line in lines:
+        # Desenha o texto com o contorno
+        cv2.putText(image, line, (x, y + y_offset), font, font_scale, contour_color, contour_thickness, line_type)
+        # Desenha o texto preenchido sobre o texto com contorno
+        cv2.putText(image, line, (x, y + y_offset), font, font_scale, color, thickness, line_type)
+        y_offset += int(font_scale * 30)  # Ajusta o espaçamento entre as linhas, se necessário
+
 # Gerencia os rostos que estão sendo identificados
 # para cada um ser tratado individualmente
 def handle_faces(multi_face_landmarks, image, cont):
@@ -108,8 +121,11 @@ def handle_faces(multi_face_landmarks, image, cont):
     for info in face_info:
         if info:
             make_landmarks(mp_drawing, mp_face_mesh, mp_drawing_styles, image, info['landmarks'])
-            cv2.putText(image, info['frase'], (info['x_text'], info['y_text']), cv2.FONT_HERSHEY_SIMPLEX, info['font_size'], info['color'], 2, cv2.LINE_AA)
-
+            
+            # Quebrar o texto em linhas com comprimento máximo de 40 caracteres
+            draw_text(image, info['frase'], info['x_text'], info['y_text'], 
+                  cv2.FONT_HERSHEY_SIMPLEX, info['font_size'], info['color'], 
+                  2, cv2.LINE_AA, max_width=40, contour_color=(0, 0, 0), contour_thickness=5)
     return cont
 
 # Constrói o vetor de informações necessárias sobre o rosto
@@ -122,12 +138,12 @@ def handle_face(idx, face_landmarks, image, image_copy, cont):
 
     try:
         if face_info[idx] == None:
-            i = random.randint(0, 74)
+            i = random.randint(0, len(phrases))
             face_detected = True
         else:
             i = face_info[idx]['i']
     except:
-        i = random.randint(0, 74)
+        i = random.randint(0, len(phrases))
         face_detected = True
     
     frase, color, font_size = get_text_and_color(distance, i, SMALL_DISTANCE, BIG_DISTANCE)
@@ -189,6 +205,8 @@ def get_positions(face_landmarks, image):
 def get_text_and_color(distance, i, marca_prox, marca_dist):
     colors = [(0, 255, 0), (0, 255, 255), (0, 0, 255)]  # Verde, Amarelo, Vermelho
 
+    print(distance)
+
     if distance > marca_prox:
         frase = phrases[i][0] # ...[0] indica a versão amigável da frase
         color = colors[0]  # Verde
@@ -196,21 +214,22 @@ def get_text_and_color(distance, i, marca_prox, marca_dist):
     elif distance < marca_prox and distance > marca_dist:
         frase = phrases[i][1] # ...[1] indica a versão razoável da frase
         color = colors[1]  # Amarelo
-        font_size = 1.4  # Tamanho médio da fonte
+        font_size = 1.15  # Tamanho médio da fonte
     elif distance < marca_dist:
         frase = phrases[i][2] # ...[2] indica a versão agressiva da frase
         color = colors[2]  # Vermelho
-        font_size = 1.8  # Tamanho grande da fonte
+        font_size = 1.15 # Tamanho grande da fonte
 
     return frase, color, font_size
 
 # Com base nas coordenadas (x, y) do ponto da testa e do tamanho da frase
 # define a posição na tela.
 def set_text_position(x_forehead, y_forehead, frase, font_size):
-    text_width, _ = cv2.getTextSize(frase, cv2.FONT_HERSHEY_SIMPLEX, font_size, 2)[0]
+    lines = textwrap.wrap(frase, width=text_max_width)
+    text_width, _ = cv2.getTextSize(lines[0], cv2.FONT_HERSHEY_SIMPLEX, font_size, 2)[0]
 
-    x = int(x_forehead - text_width // 2)
-    y = int(y_forehead) - 50
+    x = int(x_forehead - text_width//2)
+    y = int(y_forehead - 130)
 
     return x, y
 
