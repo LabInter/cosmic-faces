@@ -35,7 +35,7 @@ This command will start the application that will use the camera for image captu
     python3 MakeMosaico.py
     ```
 
-This command will start the process of generating a mosaic from the captured images.
+This command will start the process of generating a mosaic from the captured images, which will be saved in the `./mosaico.png` file
 
 ## Notes
 
